@@ -38,8 +38,20 @@ export function getJobResult(job: Job): object | undefined {
     return job[JOB_RESULT_KEY];
 }
 
+/**
+ * Checks if a job has the expected task identifier, otherwise throws an error.
+ * Can be used to make sure you get the expected payload type.
+ */
 export function assertTaskIdentifier(helpers: JobHelpers, identifier: string): void {
     if (helpers.job.task_identifier !== identifier) {
         throw new Error(`task_identifier "${helpers.job.task_identifier}" does not match expected value "${identifier}"`);
     }
+}
+
+/**
+ * Make sure a job has the expected task identifier and return the jobs payload if available.
+ */
+export function validateTask<PayloadType>(helpers: JobHelpers, expectedIdentifier: string): PayloadType | undefined {
+    assertTaskIdentifier(helpers, expectedIdentifier);
+    return helpers.job.payload as PayloadType | undefined;
 }
