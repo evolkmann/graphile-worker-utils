@@ -5,9 +5,14 @@ describe('util', () => {
         it('should handle valid strings', () => {
             expect(stringOrNull('str')).toEqual(`'str'`);
         });
+        it('should use custom quote chars', () => {
+            expect(stringOrNull('str', '$graphile$')).toEqual(`$graphile$str$graphile$`);
+        });
         it('should handle nullish values', () => {
             expect(stringOrNull(null)).toEqual(`null`);
             expect(stringOrNull(undefined)).toEqual(`null`);
+            expect(stringOrNull(null, '$graphile$')).toEqual(`null`);
+            expect(stringOrNull(undefined, '$graphile$')).toEqual(`null`);
         });
     });
 

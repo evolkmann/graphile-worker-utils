@@ -24,6 +24,8 @@ export interface PersistentWorkerConfig {
  */
 export abstract class PersistentGraphileQueueWorker extends GraphileQueueWorker {
 
+    private static SQL_STRING_QUOTE = '$safe_quote$';
+
     protected constructor(
         poolFactory: () => Promise<Pool>,
         taskList: TaskList,
@@ -65,13 +67,13 @@ export abstract class PersistentGraphileQueueWorker extends GraphileQueueWorker 
                             ${job.id},
                             ${stringOrNull(job.queue_name)},
                             ${stringOrNull(job.task_identifier)},
-                            ${stringOrNull(JSON.stringify(job.payload || {}))}::jsonb,
-                            ${stringOrNull(result ? JSON.stringify(result) : null)}::jsonb,
+                            ${stringOrNull(JSON.stringify(job.payload || {}), PersistentGraphileQueueWorker.SQL_STRING_QUOTE)},
+                            ${stringOrNull(result ? JSON.stringify(result) : null, PersistentGraphileQueueWorker.SQL_STRING_QUOTE)},
                             ${numberOrDefault(job.priority)},
                             ${stringOrNull(job.run_at.toISOString())},
                             ${numberOrDefault(job.attempts)},
                             ${numberOrDefault(job.max_attempts)},
-                            ${stringOrNull(job.last_error)},
+                            ${stringOrNull(job.last_error, PersistentGraphileQueueWorker.SQL_STRING_QUOTE)},
                             ${stringOrNull(job.created_at.toISOString())},
                             ${stringOrNull(job.updated_at.toISOString())},
                             ${stringOrNull(job.key)},
