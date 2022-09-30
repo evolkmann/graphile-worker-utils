@@ -15,12 +15,12 @@
     "@types/jest": "28.1.8",
     "graphile-worker": "0.13.0",
     "jest": "28.1.3",
-    "pg": "8.7.3",
+    "pg": "8.8.0",
     "ts-jest": "28.0.7",
     "typescript": "4.8.4"
   },
   "peerDependencies": {
     "graphile-worker": "^0.13.0",
-    "pg": "^8.7.3"
+    "pg": "^8.8.0"
   }
 }

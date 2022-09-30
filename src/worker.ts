@@ -1,5 +1,6 @@
 import { run, Runner, TaskList, WorkerEvents } from 'graphile-worker';
 import { Pool } from 'pg';
+import { isPool } from './util';
 
 export abstract class GraphileQueueWorker {
 
@@ -14,8 +15,8 @@ export abstract class GraphileQueueWorker {
 
     async start(): Promise<void> {
         this.pool = await this.poolFactory();
-        if (!this.pool || !(this.pool instanceof Pool)) {
-            throw new Error(`The poolFactory function your provided in the constructor did not return a pool instance`)
+        if (!this.pool || !isPool(this.pool)) {
+            throw new Error(`The poolFactory function your provided in the constructor did not return a pool instance: ${this.pool} (type ${typeof this.pool})`);
         }
 
         this.runner = await run({

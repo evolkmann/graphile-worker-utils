@@ -1,4 +1,5 @@
-import { numberOrDefault, stringOrNull } from './util';
+import { Client, Pool } from 'pg';
+import { isPool, numberOrDefault, stringOrNull } from './util';
 
 describe('util', () => {
     describe('stringOrNull', () => {
@@ -26,6 +27,22 @@ describe('util', () => {
         it('should handle nullish values', () => {
             expect(numberOrDefault(null)).toEqual(`default`);
             expect(numberOrDefault(undefined)).toEqual(`default`);
+        });
+    });
+
+    describe('isPool', () => {
+        it('should detect valid pool', () => {
+            const pool = new Pool();
+            expect(isPool(pool)).toBe(true);
+        });
+        it('should detect invalid pool', () => {
+            const client = new Client()
+            expect(isPool()).toBe(false);
+            expect(isPool(0)).toBe(false);
+            expect(isPool('pool')).toBe(false);
+            expect(isPool(null)).toBe(false);
+            expect(isPool(undefined)).toBe(false);
+            expect(isPool(client)).toBe(false);
         });
     });
 });
