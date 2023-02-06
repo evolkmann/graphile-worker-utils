@@ -1,5 +1,6 @@
 import { TaskList } from 'graphile-worker';
 import { Pool } from 'pg';
+import { JobFlags, jobHasFlag } from './flags';
 import { getJobResult } from './job';
 import { numberOrDefault, stringOrNull } from './util';
 import { GraphileQueueWorker } from './worker';
@@ -42,6 +43,9 @@ export abstract class PersistentGraphileQueueWorker extends GraphileQueueWorker 
     private setupEventListeners(): void {
         if (this.pool && this.events) {
             this.events.on('job:success', async ({ job }) => {
+                if (jobHasFlag(job, JobFlags.DO_NOT_PERSIST)) {
+                    return;
+                }
                 const result = getJobResult(job);
                 await this.pool!.query(`
                     insert into "${this.config.target.schema}"."${this.config.target.table}"
