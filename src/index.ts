@@ -1,3 +1,4 @@
+export * from './flags';
 export * from './manager';
 export * from './worker';
 export * from './persistent-worker';
