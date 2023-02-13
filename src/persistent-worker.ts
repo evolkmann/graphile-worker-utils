@@ -1,5 +1,6 @@
 import { TaskList } from 'graphile-worker';
 import { Pool } from 'pg';
+import { WorkerEvent } from './events';
 import { JobFlags, jobHasFlag } from './flags';
 import { getJobResult } from './job';
 import { numberOrDefault, stringOrNull } from './util';
@@ -40,9 +41,16 @@ export abstract class PersistentGraphileQueueWorker extends GraphileQueueWorker 
         this.setupEventListeners();
     }
 
+    override async stop(): Promise<void> {
+        await super.stop();
+        if (this.events) {
+            this.events.removeAllListeners(WorkerEvent.JOB_SUCCESS);
+        }
+    }
+
     private setupEventListeners(): void {
         if (this.pool && this.events) {
-            this.events.on('job:success', async ({ job }) => {
+            this.events.on(WorkerEvent.JOB_SUCCESS, async ({ job }) => {
                 if (jobHasFlag(job, JobFlags.DO_NOT_PERSIST)) {
                     return;
                 }

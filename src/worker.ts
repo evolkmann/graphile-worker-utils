@@ -26,4 +26,8 @@ export abstract class GraphileQueueWorker {
         this.events = this.runner.events;
     }
 
+    async stop(): Promise<void> {
+        await this.runner?.stop();
+    }
+
 }
