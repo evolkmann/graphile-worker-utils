@@ -21,3 +21,5 @@ export function isPool(queryable?: unknown): boolean {
         && queryable !== null
         && (queryable as any)?._connected === undefined;
 }
+
+export type PoolOrPoolFactory = Pool | (() => Pool) | (() => Promise<Pool>);
