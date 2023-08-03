@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { makeWorkerUtils } from 'graphile-worker';
 import { Pool } from 'pg';
 import { PersistentGraphileQueueWorker, PersistentWorkerConfig } from '../src';
+import { DemoManager } from './manager';
 
 async function createFinishedJobsTable(pool: Pool, config: PersistentWorkerConfig): Promise<void> {
     await pool.query(`
@@ -41,10 +42,13 @@ async function main() {
         pgPool,
         {
             test: async (payload, helpers) => {},
-            test2: async (payload, helpers) => {}
+            demo: async (payload, helpers) => {},
+            'demo-with-payload': async (payload, helpers) => {}
         },
         config
     );
+    const manager = new DemoManager(workerUtils);
+
     workerUtils.logger.info(`Created Worker`);
 
     const targetTablesExists = await worker.targetTableExists();
@@ -76,11 +80,11 @@ async function main() {
 
     workerUtils.logger.info(`Adding five more tasks`);
     workerUtils.logger.info(`They will not be processed until the worker is started again...`);
-    await workerUtils.addJob('test2');
-    await workerUtils.addJob('test2');
-    await workerUtils.addJob('test2');
-    await workerUtils.addJob('test2');
-    await workerUtils.addJob('test2');
+    await manager.scheduleDemoJob();
+    await manager.scheduleDemoJob();
+    await manager.scheduleDemoJobWithPayload({ prop: 'a' });
+    await manager.scheduleDemoJobWithPayload({ prop: 'b' });
+    await manager.scheduleDemoJobWithPayload({ prop: 'c' });
 
     workerUtils.logger.info(`Starting worker again in 3sec for 3sec...`);
     await wait(3000);
@@ -88,6 +92,7 @@ async function main() {
     await wait(3000);
     workerUtils.logger.info(`Stopping worker and disconnecting...`);
     workerUtils.logger.info(`Check the ${config.target.schema}.${config.target.table} table to see if the jobs were processed`);
+    await manager.stop();
     await worker.stop();
     await workerUtils.release();
     await pgPool.end();
