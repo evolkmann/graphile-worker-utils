@@ -1,8 +1,9 @@
 import 'dotenv/config';
 import { makeWorkerUtils } from 'graphile-worker';
 import { Pool } from 'pg';
-import { PersistentGraphileQueueWorker, PersistentWorkerConfig } from '../src';
+import { PersistentWorkerConfig } from '../src';
 import { DemoManager } from './manager';
+import { DemoWorker } from './worker';
 
 async function createFinishedJobsTable(pool: Pool, config: PersistentWorkerConfig): Promise<void> {
     await pool.query(`
@@ -38,15 +39,7 @@ async function main() {
             table: 'finished_job'
         }
     };
-    const worker = new PersistentGraphileQueueWorker(
-        pgPool,
-        {
-            test: async (payload, helpers) => {},
-            demo: async (payload, helpers) => {},
-            'demo-with-payload': async (payload, helpers) => {}
-        },
-        config
-    );
+    const worker = new DemoWorker(pgPool, config);
     const manager = new DemoManager(workerUtils);
 
     workerUtils.logger.info(`Created Worker`);
