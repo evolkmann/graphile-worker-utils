@@ -1,0 +1,16 @@
+version: '3.3'
+services:
+  postgres:
+    image: postgres:15
+    ports:
+      - 5469:5432
+    environment:
+      POSTGRES_DB: gwu_demo
+      POSTGRES_USER: gwu_demo
+      POSTGRES_PASSWORD: gwu_demo
+    volumes:
+      - 'postgres:/var/lib/postgresql/data'
+
+volumes:
+  postgres:
+  postgres-shadow:

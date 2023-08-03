@@ -1,22 +1,22 @@
 import { run, Runner, TaskList, WorkerEvents } from 'graphile-worker';
 import { Pool } from 'pg';
-import { isPool } from './util';
+import { isPool, PoolOrPoolFactory } from './util';
 
-export abstract class GraphileQueueWorker {
+export class GraphileQueueWorker {
 
     private runner?: Runner;
     protected pool?: Pool;
     protected events?: WorkerEvents;
 
-    protected constructor(
-        private readonly poolFactory: () => Promise<Pool>,
+    constructor(
+        private readonly _pool: PoolOrPoolFactory,
         private readonly taskList: TaskList
     ) {}
 
     async start(): Promise<void> {
-        this.pool = await this.poolFactory();
+        await this.setupPool();
         if (!this.pool || !isPool(this.pool)) {
-            throw new Error(`The poolFactory function your provided in the constructor did not return a pool instance: ${this.pool} (type ${typeof this.pool})`);
+            throw new Error(`The pool or poolFactory function your provided in the constructor did not return a pool instance: ${this.pool} (type ${typeof this.pool})`);
         }
 
         this.runner = await run({
@@ -28,6 +28,18 @@ export abstract class GraphileQueueWorker {
 
     async stop(): Promise<void> {
         await this.runner?.stop();
+    }
+
+    protected async setupPool(): Promise<void> {
+        if (this.pool && isPool(this.pool)) {
+            // Pool has already been set up
+            return;
+        }
+        if (typeof this._pool === 'function') {
+            this.pool = await this._pool();
+        } else {
+            this.pool = this._pool;
+        }
     }
 
 }
