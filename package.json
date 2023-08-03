@@ -9,7 +9,11 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "test": "jest"
+    "test": "jest",
+    "demo:db:reset": "yarn demo:db:down && yarn demo:db:up",
+    "demo:db:down": "docker-compose -f demo/docker-compose.yml -p gwu_demo down -v",
+    "demo:db:up": "docker-compose -f demo/docker-compose.yml -p gwu_demo up -d",
+    "demo:worker:install-schema": "node -r dotenv/config ./node_modules/.bin/graphile-worker --schema-only"
   },
   "devDependencies": {
     "@types/jest": "29.5.3",

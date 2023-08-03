@@ -30,7 +30,11 @@ export class GraphileQueueWorker {
         await this.runner?.stop();
     }
 
-    private async setupPool(): Promise<void> {
+    protected async setupPool(): Promise<void> {
+        if (this.pool && isPool(this.pool)) {
+            // Pool has already been set up
+            return;
+        }
         if (typeof this._pool === 'function') {
             this.pool = await this._pool();
         } else {

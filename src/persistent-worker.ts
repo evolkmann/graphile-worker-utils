@@ -38,11 +38,11 @@ export class PersistentGraphileQueueWorker extends GraphileQueueWorker {
     }
 
     override async start(): Promise<void> {
-        await super.start();
-        const tableExists = await this.tableExists();
+        const tableExists = await this.targetTableExists();
         if (!tableExists) {
             throw new Error(`The table "${this.config.target.schema}"."${this.config.target.table}" does not exist`);
         }
+        await super.start();
         this.setupEventListeners();
     }
 
@@ -53,11 +53,18 @@ export class PersistentGraphileQueueWorker extends GraphileQueueWorker {
         }
     }
 
-    private async tableExists(): Promise<boolean> {
+    /**
+     * Checks if the table defined in the constructor options
+     * exists - indicating that the worker can be started.
+     *
+     * You can use this method to automatically perform a migration
+     * if the table does not exist yet.
+     */
+    async targetTableExists(): Promise<boolean> {
         if (!this.pool) {
-            return false;
+            await this.setupPool();
         }
-        const result = await this.pool.query<{
+        const result = await this.pool?.query<{
             exists: boolean;
         }>(`
             select exists(
@@ -70,7 +77,7 @@ export class PersistentGraphileQueueWorker extends GraphileQueueWorker {
             this.config.target.schema,
             this.config.target.table
         ]);
-        return result.rows[0].exists;
+        return result?.rows?.[0]?.exists || false;
     }
 
     private setupEventListeners(): void {
